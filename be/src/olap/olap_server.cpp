@@ -91,7 +91,7 @@ Status StorageEngine::start_bg_threads() {
                 .set_max_threads(config::seg_compaction_max_threads)
                 .build(&_seg_compaction_thread_pool);
     }
-
+//TODO compaction入口
     // compaction tasks producer thread
     RETURN_IF_ERROR(Thread::create(
             "StorageEngine", "compaction_tasks_producer_thread",
@@ -416,7 +416,7 @@ void StorageEngine::_compaction_tasks_producer_callback() {
     int64_t last_cumulative_score_update_time = 0;
     int64_t last_base_score_update_time = 0;
     static const int64_t check_score_interval_ms = 5000; // 5 secs
-
+//TODO 生成compaction作业的最小间隔时间
     int64_t interval = config::generate_compaction_tasks_min_interval_ms;
     do {
         if (!config::disable_auto_compaction) {
@@ -424,6 +424,11 @@ void StorageEngine::_compaction_tasks_producer_callback() {
 
             bool check_score = false;
             int64_t cur_time = UnixMillis();
+/*
+compaction流程是为了减少rowset文件数量，提升查询数据查找效率。
+CUMULATIVE_COMPACTION 增量
+BASE_COMPACTION
+*/
             if (round < config::cumulative_compaction_rounds_for_each_base_compaction_round) {
                 compaction_type = CompactionType::CUMULATIVE_COMPACTION;
                 round++;
